@@ -13,7 +13,7 @@ client.on("ready", () => {
     console.log(`Logged in as ${client.user.tag}`);
 });
 
-client.on("messageCreate", (message) => {
+client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
 
     const prefix = "!";
@@ -22,7 +22,7 @@ client.on("messageCreate", (message) => {
     const args = message.content.slice(prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
-    // ---------------------- BACKUP COMMAND ----------------------
+    // -------- BACKUP COMMAND --------
     if (command === "backup") {
         const location = args.join(" ");
 
@@ -32,19 +32,23 @@ client.on("messageCreate", (message) => {
             );
         }
 
-        // Delete user message
+        // delete user msg
         message.delete().catch(() => {});
 
-        return message.channel.send(
-            `🚨 **Backup Requested!**
+        const botmsg = await message.channel.send(
+`🚨 **Backup Requested!**
 <@${message.author.id}> needs help at **${location}**!
 @everyone respond immediately! 🚓
 
 Type \`!accept ${message.author.id}\` if you're coming for help!`
         );
+
+        // Protect message (anti-delete)
+        botmsg.pin().catch(() => {});
+        setTimeout(() => botmsg.unpin().catch(() => {}), 1500);
     }
 
-    // ---------------------- ACCEPT COMMAND ----------------------
+    // -------- ACCEPT COMMAND --------
     if (command === "accept") {
         const user = args[0];
 
@@ -54,12 +58,16 @@ Type \`!accept ${message.author.id}\` if you're coming for help!`
             );
         }
 
-        // Delete user message
+        // delete user msg
         message.delete().catch(() => {});
 
-        return message.channel.send(
+        const botmsg = await message.channel.send(
             `🛡️ <@${message.author.id}> accepted backup from ${user} 🚓`
         );
+
+        // Protect from deletion
+        botmsg.pin().catch(() => {});
+        setTimeout(() => botmsg.unpin().catch(() => {}), 1500);
     }
 });
 
