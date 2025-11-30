@@ -9,23 +9,20 @@ const client = new Client({
     ]
 });
 
-const PREFIX = "!";
-
 client.on("ready", () => {
-    console.log(`Bot logged in as ${client.user.tag}`);
+    console.log(`Logged in as ${client.user.tag}`);
 });
 
 client.on("messageCreate", (message) => {
     if (message.author.bot) return;
 
-    if (!message.content.startsWith(PREFIX)) return;
+    const prefix = "!";
+    if (!message.content.startsWith(prefix)) return;
 
-    const args = message.content.slice(PREFIX.length).trim().split(" ");
+    const args = message.content.slice(prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
-    // ---------------------------
-    // 1) BACKUP COMMAND
-    // ---------------------------
+    // ---------------------- BACKUP COMMAND ----------------------
     if (command === "backup") {
         const location = args.join(" ");
 
@@ -35,25 +32,33 @@ client.on("messageCreate", (message) => {
             );
         }
 
+        // Delete user message
+        message.delete().catch(() => {});
+
         return message.channel.send(
-            `🚨 **Backup Requested!**\n<@${message.author.id}> needs help at **${location}**!\n@everyone respond immediately! 🚓\n\nType \`!accept ${message.author.id}\` if you're coming for help!`
+            `🚨 **Backup Requested!**
+<@${message.author.id}> needs help at **${location}**!
+@everyone respond immediately! 🚓
+
+Type \`!accept ${message.author.id}\` if you're coming for help!`
         );
     }
 
-    // ---------------------------
-    // 2) ACCEPT COMMAND
-    // ---------------------------
+    // ---------------------- ACCEPT COMMAND ----------------------
     if (command === "accept") {
-        const target = args[0];
+        const user = args[0];
 
-        if (!target) {
+        if (!user) {
             return message.channel.send(
-                "Please mention the user whose backup you’re accepting! Example: `!accept @User`"
+                "Please mention the user whose backup you're accepting! Example: `!accept @User`"
             );
         }
 
+        // Delete user message
+        message.delete().catch(() => {});
+
         return message.channel.send(
-            `🛡️ <@${message.author.id}> accepted backup from ${target} 🚓`
+            `🛡️ <@${message.author.id}> accepted backup from ${user} 🚓`
         );
     }
 });
